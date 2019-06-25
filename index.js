@@ -9,10 +9,9 @@ server.use(express.json());
 
 function checkProjectExists(req, res, next) {
   const { id } = req.params;
-  req.id = id;
   const project = projects.find(projeto => projeto.id === id);
   if (project) {
-    next();
+    return next();
   }
 
   return res.status(404).json({ message: "Projeto não encontrado" });
@@ -43,13 +42,14 @@ server.post("/projects", (req, res) => {
 
 server.put("/projects/:id", checkProjectExists, (req, res) => {
   const { title } = req.body;
-  const { id } = req;
-  projects[id] = { ...projects[id], title };
+  const { id } = req.params;
+  const index = projects.findIndex(projeto => projeto.id === id);
+  projects[index] = { ...projects[index], title };
   return res.json(projects);
 });
 
 server.delete("/projects/:id", checkProjectExists, (req, res) => {
-  const { id } = req;
+  const { id } = req.params;
   const index = projects.findIndex(projeto => projeto.id === id);
   projects.splice(index, 1);
   return res.send();
@@ -57,7 +57,7 @@ server.delete("/projects/:id", checkProjectExists, (req, res) => {
 
 server.post("/projects/:id/tasks", checkProjectExists, (req, res) => {
   const { title } = req.body;
-  const { id } = req;
+  const { id } = req.param;
   const index = projects.findIndex(projeto => projeto.id === id);
   projects[index].tasks.push(title);
   return res.json(projects[index]);
