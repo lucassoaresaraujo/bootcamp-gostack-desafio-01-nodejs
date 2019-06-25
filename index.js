@@ -9,8 +9,9 @@ server.use(express.json());
 
 function checkProjectExists(req, res, next) {
   const { id } = req.params;
-  const project = projects.find(projeto => projeto.id === id);
-  if (project) {
+  const index = projects.findIndex(projeto => projeto.id === id);
+  req.index = index;
+  if (index >= 0) {
     return next();
   }
 
@@ -20,7 +21,7 @@ function checkProjectExists(req, res, next) {
 function printNumberOfRequests(req, res, next) {
   numberOfRequests++;
   console.log(`Quantidade de requisições: ${numberOfRequests}`);
-  next();
+  return next();
 }
 
 server.use(printNumberOfRequests);
@@ -42,23 +43,20 @@ server.post("/projects", (req, res) => {
 
 server.put("/projects/:id", checkProjectExists, (req, res) => {
   const { title } = req.body;
-  const { id } = req.params;
-  const index = projects.findIndex(projeto => projeto.id === id);
+  const { index } = req;
   projects[index] = { ...projects[index], title };
   return res.json(projects);
 });
 
 server.delete("/projects/:id", checkProjectExists, (req, res) => {
-  const { id } = req.params;
-  const index = projects.findIndex(projeto => projeto.id === id);
+  const { index } = req;
   projects.splice(index, 1);
   return res.send();
 });
 
 server.post("/projects/:id/tasks", checkProjectExists, (req, res) => {
   const { title } = req.body;
-  const { id } = req.param;
-  const index = projects.findIndex(projeto => projeto.id === id);
+  const { index } = req;
   projects[index].tasks.push(title);
   return res.json(projects[index]);
 });
